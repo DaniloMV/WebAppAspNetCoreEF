@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,11 +31,25 @@ namespace WebAppAspNetCoreEF
             //SQL Server Yo voy a decir si el server encontro,
             //es un servicio especial que me permite entre otras cosas obtener información 
             //proveniente de uno de esos proveedores de configuración es un archivo de json (DefaultConnection).
+            //EnableSensitiveDataLogging(true) Esto lo que hace es que te permite ver el valor de los parámetros
+            //enviados lo cual no siempre es bueno porque ejemplo podrías ver un password de un usuario o algo por el estilo solo lo vamos a utilizar para pruebas.
+            ///
             services.AddDbContext<ApplicationDbContext>(options => 
-            options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
-
+            options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"))
+            .EnableSensitiveDataLogging(true)
+            .UseLoggerFactory(MyLoggerFactory)
+            );
             services.AddControllersWithViews();
         }
+
+        public static readonly ILoggerFactory MyLoggerFactory = LoggerFactory.Create(builder =>
+        {
+            builder
+               .AddFilter((category, level) =>
+                   category == DbLoggerCategory.Database.Command.Name
+                   && level == LogLevel.Information)
+               .AddConsole();
+        });
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
