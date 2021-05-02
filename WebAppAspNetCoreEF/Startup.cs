@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -8,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using WebAppAspNetCoreEF.Models;
 
 namespace WebAppAspNetCoreEF
 {
@@ -23,6 +25,14 @@ namespace WebAppAspNetCoreEF
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            //Voy a pasar un parámetro del DbContext que acabamos de crear 
+            //le voy a pasar un expresión lambda para configurar qué vammos a utilizar
+            //SQL Server Yo voy a decir si el server encontro,
+            //es un servicio especial que me permite entre otras cosas obtener información 
+            //proveniente de uno de esos proveedores de configuración es un archivo de json (DefaultConnection).
+            services.AddDbContext<ApplicationDbContext>(options => 
+            options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+
             services.AddControllersWithViews();
         }
 
